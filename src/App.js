@@ -1,9 +1,24 @@
 import './App.css';
-import productsArr from './Components/Products.js/Products';
 import { Col, Container, Row } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Navbarr from './Components/Layout/Navbar';
-function App() {
+import { useContext } from 'react';
+
+import ContextApi from './Components/Context/ContextApi';
+import cartElements from './Components/Cart/CartElements';
+function App(props) {
+  const crtctx = useContext(ContextApi);
+
+  const addToCartHandler = (item) => {
+    crtctx.addItem({
+      id: item.id,
+      title: item.title,
+      amount: item.amount,
+      price: item.price,
+      quantity: 1, // Set the initial quantity to 1
+      imageUrl: item.imageUrl,
+    });
+  }
   return (
     <div className="App">
       <Navbarr/>
@@ -11,7 +26,7 @@ function App() {
 
       <Container className='mt-3'>
         <Row >
-            {productsArr.map((item) => (
+            {cartElements.map((item) => (
               <Col key={item.id} xs={6} md={6}>
               <div className='item'> {/* Added a unique key */}
                 <span className="display-6">{item.title}</span><br/>
@@ -20,7 +35,7 @@ function App() {
                   <Row>
                     <Col>
                     <span>${item.price}</span><br/>
-                    <Button className='m-1'>ADD TO CART</Button>
+                    <Button className='m-1' onClick={() => addToCartHandler(item)}>ADD TO CART</Button>
                     </Col>
                   </Row>
                 </Container>
