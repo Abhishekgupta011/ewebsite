@@ -1,0 +1,30 @@
+
+.about-heading {
+    color: #333; 
+    font-size: 24px; 
+    margin-top: 20px; 
+    text-align: center; 
+  }
+
+  .about-image {
+    max-width: 100%; 
+    display: block; 
+    margin: 0 auto; 
+    border: 2px solid #333; 
+    border-radius: 50%; 
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); 
+  }
+  
+  /* Styling the caption */
+  .figure-caption-custom {
+    text-align: center; /* Center text within the caption */
+    margin-top: 10px; /* Top margin for the caption */
+  }
+
+  .about-description {
+    font-size: 18px; 
+    text-align: justify; 
+    margin-top: 20px; 
+    line-height: 1.5; 
+}
+  

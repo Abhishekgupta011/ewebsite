@@ -1,0 +1,15 @@
+.image-container {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+  }
+  
+  .hover-zoom {
+    transition: transform 0.4s ease-in-out;
+  }
+  
+  .hover-zoom:hover {
+    transform: scale(1.4);
+    z-index: 1; /* Bring the hovered image to the front */
+  }
+  

@@ -16,7 +16,7 @@ const cartElements = [
     {
         id:2,
     
-    title: 'Black and white Colors',
+    title: 'Black',
     
     price: 50,
     
@@ -28,7 +28,7 @@ const cartElements = [
     
     {
     id:3,
-    title: 'Yellow and Black Colors',
+    title: 'Yellow',
     
     price: 70,
     
