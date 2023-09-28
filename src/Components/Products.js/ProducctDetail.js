@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Button, Container } from 'react-bootstrap';
 import ContextApi from '../Context/ContextApi';
 import cartElements from '../Cart/CartElements';
+import './ProducctDetail.css'
 
 const ProductDetail = ({ reviews }) => {
   const crtctx = useContext(ContextApi);
@@ -18,7 +19,7 @@ const ProductDetail = ({ reviews }) => {
   return (
     <Container className='product-detail'>
       <h1>{product.title}</h1>
-      <div className='image-container'>
+      <div className='hover-zoom'>
         {/* Assuming you want to display a single image */}
         <img src={product.imageUrl} alt={`Product`} />
       </div>
