@@ -3,6 +3,7 @@ import { Button, Col, Container, Row } from "react-bootstrap";
 import cartElements from "../Cart/CartElements";
 import ContextApi from "../Context/ContextApi";
 import './ProductList.css'
+import { Link } from "react-router-dom";
 const ProductList = ()=>{
     const crtctx = useContext(ContextApi);
 
@@ -25,9 +26,13 @@ const ProductList = ()=>{
                 <div className='item text-center'>
                   <h5 className="mt-3">{item.title}</h5><br />
                   <div className="image-container">
-                  <img src={item.imageUrl} alt={item.title} 
-                  className="img-fluid rounded hover-zoom"
-                  />
+                    <Link to={`/products/${item.id}`}>
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="img-fluid rounded hover-zoom"
+                      />
+                    </Link>
                   </div><br />
                   <Container>
                     <Row>
