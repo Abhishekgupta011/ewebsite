@@ -1,22 +1,12 @@
-import React, { useContext } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import React from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import cartElements from "../Cart/CartElements";
-import ContextApi from "../Context/ContextApi";
+
 import './ProductList.css'
 import { Link } from "react-router-dom";
+import AddToCartButton from "./Button/AddToCartButton";
 const ProductList = ()=>{
-    const crtctx = useContext(ContextApi);
 
-  const addToCartHandler = (item) => {
-    crtctx.addItem({
-      id: item.id,
-      title: item.title,
-      amount: item.amount,
-      price: item.price,
-      quantity: 1, 
-      imageUrl: item.imageUrl,
-    });
-  }
     return (
         <Container className=''>
         <h3 className="text-center mb-4">MUSIC</h3>
@@ -38,7 +28,7 @@ const ProductList = ()=>{
                     <Row>
                       <Col>
                         <span>${item.price}</span><br />
-                        <Button className='m-1' onClick={() => addToCartHandler(item)}>ADD TO CART</Button>
+                        <AddToCartButton item={item}/>
                       </Col>
                     </Row>
                   </Container>

@@ -1,12 +1,12 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Container } from 'react-bootstrap';
-import ContextApi from '../Context/ContextApi';
+import { Container } from 'react-bootstrap';
 import cartElements from '../Cart/CartElements';
 import './ProducctDetail.css'
+import AddToCartButton from './Button/AddToCartButton';
 
 const ProductDetail = ({ reviews }) => {
-  const crtctx = useContext(ContextApi);
+
   const { productId } = useParams();
   const product = cartElements.find((item) => item.id === parseInt(productId, 10));
 
@@ -32,9 +32,7 @@ const ProductDetail = ({ reviews }) => {
           </div>
         ))}
       </div>
-      <Button className='add-to-cart' onClick={() => crtctx.addItem(product)}>
-        ADD TO CART
-      </Button>
+      <AddToCartButton item={product}/>
     </Container>
   );
 };
