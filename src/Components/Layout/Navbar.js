@@ -30,7 +30,10 @@ const Navbarr = () => {
 
   // Conditionally render the cart button based on the current route
   const renderCartButton = () => {
-    if (location.pathname === "/" || location.pathname === "/about" || location.pathname === "/contact") {
+    if (location.pathname === "/" || 
+    location.pathname === "/about" || 
+    location.pathname === "/contact" ||
+    location.pathname === "/login") {
       return null; // Hide the cart button on home and about pages
     } else {
       return (
@@ -50,10 +53,11 @@ const Navbarr = () => {
     className="mt-0 border-bottom border-white">
       <Container className="bg-dark">
         <Nav className="justify-content-center">
-          <Nav.Link as={NavLink} to="/" exact className="text-white" activeClassName="active">Home</Nav.Link>
-          <Nav.Link as={NavLink} to="/store" className="text-white" activeClassName="active">Store</Nav.Link>
-          <Nav.Link as={NavLink} to="/about" className="text-white" activeClassName="active">About</Nav.Link>
-          <Nav.Link as={NavLink} to="/contact" className="text-white" activeClassName="active">Contact Us</Nav.Link> 
+          <Nav.Link as={NavLink} to="/" exact="true" className="text-white" activeclassname="active">Home</Nav.Link>
+          <Nav.Link as={NavLink} to="/store" className="text-white" activeclassname="active">Store</Nav.Link>
+          <Nav.Link as={NavLink} to="/about" className="text-white" activeclassname="active">About</Nav.Link>
+          <Nav.Link as={NavLink} to="/login" className="text-white" activeclassname="active">Login</Nav.Link>
+          <Nav.Link as={NavLink} to="/contact" className="text-white" activeclassname="active">Contact Us</Nav.Link>
         </Nav>
         <Nav>
           {renderCartButton()}
