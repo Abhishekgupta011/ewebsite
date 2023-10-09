@@ -1,13 +1,14 @@
 import React, { useContext, useState } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import Button from 'react-bootstrap/Button';
-import Badge from 'react-bootstrap/Badge';
 import Cart from "../Cart/Cart";
 import ContextApi from "../Context/ContextApi";
 import { NavLink, useLocation } from "react-router-dom"; // Import NavLink and useLocation
 import "./Navbar.css";
+import { AuthenticationContext } from "../Context/CartContext";
 
 const Navbarr = () => {
+  const authCtx = useContext(AuthenticationContext)
   const cartContext = useContext(ContextApi);
   const location = useLocation(); // Get the current route location
 
@@ -27,6 +28,9 @@ const Navbarr = () => {
   const hideCartHandler = () => {
     setCartShown(false);
   }
+  const handleLogout = () => {
+    authCtx.logout();
+  }
 
   // Conditionally render the cart button based on the current route
   const renderCartButton = () => {
@@ -38,11 +42,25 @@ const Navbarr = () => {
     } else {
       return (
         <>
-        <Button className="rounded-pill" onClick={showCartHandler}>
-          Cart
+        <Button
+          className='text-muted'
+          style={{
+            marginTop: '10px',
+            marginLeft: '40px',
+            border: '2px solid skyblue',
+            padding: '5px',
+            borderRadius: '5px',
+          }}
+          onClick={showCartHandler}
+        >
+          Cart{' '}
+          {totalItemsInCart > 0 && (  // Only display <sup> if there are items in the cart
+            <sup className='text-white'>
+              {totalItemsInCart}
+            </sup>
+          )}
         </Button>
-        <Badge pill bg="danger" 
-          className="position-absolute top-0 end-1 mt-3 ms-1  translate-middle ">{totalItemsInCart}</Badge>
+
           </>
       );
     }
@@ -60,6 +78,12 @@ const Navbarr = () => {
           <Nav.Link as={NavLink} to="/contact" className="text-white" activeclassname="active">Contact Us</Nav.Link>
         </Nav>
         <Nav>
+        <Button style={{
+            marginTop: '10px',
+            marginLeft: '40px',
+            padding: '5px',
+            borderRadius: '5px',
+          }} onClick={handleLogout}>Logout</Button>
           {renderCartButton()}
         </Nav>
       </Container>
