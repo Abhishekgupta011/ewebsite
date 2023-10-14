@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthenticationContext } from '../Context/CartContext';
 
@@ -7,6 +7,8 @@ const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState({ message: '', type: '' });
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
 
   const AuthCtx = useContext(AuthenticationContext);
 
@@ -21,8 +23,8 @@ const LoginPage = () => {
 
   const submitHandler = async (event) => {
     event.preventDefault();
-    const email = event.target.email.value;
-    const password = event.target.password.value;
+    const email = emailRef.current.value;
+    const password = passwordRef.current.value;
 
     setIsLoading(true);
 
@@ -49,6 +51,7 @@ const LoginPage = () => {
       if (response.ok) {
         console.log('idToken:', responseData.idToken);
         AuthCtx.login(responseData.idToken);
+        localStorage.setItem('email', email);
         handleFeedback(`${isLogin ? 'Login' : 'Registration'} successful`, 'success');
         navigate('/store');
       } else {
@@ -65,23 +68,23 @@ const LoginPage = () => {
   return (
     <section className="container mt-5 d-flex justify-content-center align-items-center">
       <form onSubmit={submitHandler}>
-      <h1 className='text-center'>{isLogin ? 'Login' : 'Sign Up'}</h1>
-      {feedback.message && (
-        <p className={`alert ${feedback.type === 'error' ? 'alert-danger' : 'alert-success'}`}>
-          {feedback.message}
-        </p>
-      )}
+        <h1 className='text-center'>{isLogin ? 'Login' : 'Sign Up'}</h1>
+        {feedback.message && (
+          <p className={`alert ${feedback.type === 'error' ? 'alert-danger' : 'alert-success'}`}>
+            {feedback.message}
+          </p>
+        )}
         <div className="mb-3">
           <label htmlFor="email" className="form-label">
             Your Email
           </label>
-          <input type="email" className="form-control" id="email" required />
+          <input type="email" className="form-control" id="email" required ref={emailRef} />
         </div>
         <div className="mb-3">
           <label htmlFor="password" className="form-label">
             Your Password
           </label>
-          <input type="password" className="form-control" id="password" required />
+          <input type="password" className="form-control" id="password" required ref={passwordRef} />
         </div>
         <div className="mb-3">
           {isLoading ? (

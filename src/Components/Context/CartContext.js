@@ -1,9 +1,38 @@
-import React, { useReducer, useEffect, useState } from "react";
+import React, { useReducer, useEffect , useState} from "react";
 import ContextApi from "./ContextApi";
 
 const defaultCartState = {
   items: [],
   totalAmount: 0,
+};
+
+const crudUrl = "https://crudcrud.com/api/f2b82bd5ec374746852e777a8a11b10c";
+
+// Function to sanitize and retrieve email from local storage
+const getSanitizedEmail = () => {
+  let email = localStorage.getItem("email");
+  console.log(email)
+  let updatedEmail;
+  if (email) {
+    updatedEmail = email.replace(/[^a-zA-Z0-9]/g, "");
+  }
+  console.log(updatedEmail);
+  return updatedEmail;
+};
+
+// Function to add/update cart data in CRUD API
+const addToCrudHandler = async (updatedEmail, cartData) => {
+  try {
+    await fetch(`${crudUrl}/${updatedEmail}`, {
+      method: "POST",
+      body: JSON.stringify(cartData),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const cartReducer = (state, action) => {
@@ -12,43 +41,90 @@ const cartReducer = (state, action) => {
     const existingCartItemIndex = state.items.findIndex(
       (item) => item.id === action.item.id
     );
-
+      let updatedItems;
     // If it exists, increase the quantity; otherwise, add it to the cart
     if (existingCartItemIndex !== -1) {
-      const updatedItems = [...state.items];
+       updatedItems = [...state.items];
       const existingCartItem = updatedItems[existingCartItemIndex];
       existingCartItem.quantity += action.item.quantity;
-    } else {
-      state.items.push(action.item);
+    } else if (action.type === "SET_CART") {
+      return {
+        items: action.cartData.items || [],
+        totalAmount: action.cartData.totalAmount || 0,
+      };
     }
+     else {
+      updatedItems = state.items.concat(action.item);
+    } 
 
     // Calculate the new total amount
     const updatedTotalAmount =
       state.totalAmount + action.item.price * action.item.quantity;
-
-    return {
+    const newCart = {
       ...state,
-      items: [...state.items],
+      items: updatedItems,
       totalAmount: updatedTotalAmount,
     };
+    
+    // Update cart data in CRUD API
+    addToCrudHandler(getSanitizedEmail(), newCart);
+
+    return newCart;
   }
+  return state;
 };
 
-
 export const CartProvider = (props) => {
-  const [cartState, dispatchCartAction] = useReducer(
-    cartReducer,
-    defaultCartState
-  );
+  const storedCart = JSON.parse(localStorage.getItem("cart"));
+const [cartState, dispatchCartAction] = useReducer(
+  cartReducer,
+  storedCart || defaultCartState
+);
 
-  const addItemHandler = (item) => {
+  const addItemToCartHandler = (item) => {
     dispatchCartAction({ type: "ADD", item: item });
   };
+// Function to get cart data from CRUD API
+const getCartDataHandler = async (email) => {
+  try {
+    const response = await fetch(`${crudUrl}/${email}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  return null;
+};
+
+useEffect(() => {
+  const email = getSanitizedEmail();
+  const fetchData = async () => {
+    try {
+      const cartData = await getCartDataHandler(email);
+      if (cartData) {
+        dispatchCartAction({ type: "SET_CART", cartData: cartData });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Fetch cart data when the user opens the cart
+  fetchData();
+}, []);
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cartState));
+  }, [cartState]);
 
   const cartContext = {
     items: cartState.items,
     totalAmount: cartState.totalAmount,
-    addItem: addItemHandler,
+    addItem: addItemToCartHandler,
+    quantity: cartState.items.length,
+    // removeItem: removeItemToCartHandler,
   };
 
   return (
@@ -92,8 +168,10 @@ export const AuthenticationProvider = (props) => {
 
   const logout = () => {
     setToken(null);
+    localStorage.removeItem("email");
     localStorage.removeItem("authToken");
     localStorage.removeItem("expirationTime");
+   
   };
 
   const contextValue = {
@@ -111,3 +189,4 @@ export const AuthenticationProvider = (props) => {
     </AuthenticationContext.Provider>
   );
 };
+
