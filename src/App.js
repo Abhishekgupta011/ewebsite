@@ -9,7 +9,7 @@ import Footer from './Components/Layout/Footer';
 import ContactUs from './Components/Layout/ContactUs';
 import ProductDetail from './Components/Products.js/ProducctDetail';
 import LoginPage from './Components/Login/LoginPage';
-import { AuthenticationContext } from './Components/Context/CartContext';
+import { AuthenticationContext } from './Components/Context/AuthContext';
 
 const reviews = [
   { id: 1, productId: 1, comment: 'Great product!', rating: 5 },

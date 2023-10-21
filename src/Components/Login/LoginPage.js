@@ -1,17 +1,18 @@
-import React, { useContext, useState, useRef } from 'react';
+import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthenticationContext } from '../Context/CartContext';
+import { AuthenticationContext } from '../Context/AuthContext';
+import ContextApi from '../Context/ContextApi';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState({ message: '', type: '' });
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const AuthCtx = useContext(AuthenticationContext);
-
+  const crtctx = useContext(ContextApi);
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
     setFeedback({ message: '', type: '' });
@@ -23,8 +24,6 @@ const LoginPage = () => {
 
   const submitHandler = async (event) => {
     event.preventDefault();
-    const email = emailRef.current.value;
-    const password = passwordRef.current.value;
 
     setIsLoading(true);
 
@@ -78,13 +77,27 @@ const LoginPage = () => {
           <label htmlFor="email" className="form-label">
             Your Email
           </label>
-          <input type="email" className="form-control" id="email" required ref={emailRef} />
+          <input
+            type="email"
+            className="form-control"
+            id="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div className="mb-3">
           <label htmlFor="password" className="form-label">
             Your Password
           </label>
-          <input type="password" className="form-control" id="password" required ref={passwordRef} />
+          <input
+            type="password"
+            className="form-control"
+            id="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
         <div className="mb-3">
           {isLoading ? (

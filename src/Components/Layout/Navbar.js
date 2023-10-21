@@ -5,7 +5,7 @@ import Cart from "../Cart/Cart";
 import ContextApi from "../Context/ContextApi";
 import { NavLink, useLocation } from "react-router-dom"; // Import NavLink and useLocation
 import "./Navbar.css";
-import { AuthenticationContext } from "../Context/CartContext";
+import { AuthenticationContext } from "../Context/AuthContext";
 
 const Navbarr = () => {
   const authCtx = useContext(AuthenticationContext)
@@ -14,9 +14,12 @@ const Navbarr = () => {
 
   // Calculate the total number of items in the cart
   const totalItemsInCart = cartContext.items.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
+    (total, item) =>{
+      return(
+        total + item.quantity
+        )
+      
+    },0);
   const [cartShown, setCartShown] = useState(false);
   const [cartItems, setCartItems] = useState([]); // State for cart items
 
@@ -29,7 +32,10 @@ const Navbarr = () => {
     setCartShown(false);
   }
   const handleLogout = () => {
+    
     authCtx.logout();
+    cartContext.clearCart();
+    
   }
 
   // Conditionally render the cart button based on the current route

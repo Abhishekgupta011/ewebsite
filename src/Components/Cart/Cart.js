@@ -41,7 +41,7 @@ const Cart = (props) => {
               <Col xs={3}>
                 <div className="d-flex align-items-center">
                   <input min={0} max={5} className="border-2 me-3" value={item.quantity} style={{ width: "50%" }} />
-                  <Button variant="danger">REMOVE</Button>
+                  <Button variant="danger" onClick = {()=>{cartContext.removeItem(item.id)}}>REMOVE</Button>
                 </div>
               </Col>
 

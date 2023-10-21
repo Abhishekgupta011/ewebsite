@@ -1,12 +1,14 @@
-import React, { useReducer, useEffect , useState} from "react";
+import React, { useReducer, useEffect, useContext } from "react";
 import ContextApi from "./ContextApi";
+import { AuthenticationContext } from "./AuthContext";
+
 
 const defaultCartState = {
   items: [],
   totalAmount: 0,
 };
 
-const crudUrl = "https://crudcrud.com/api/f2b82bd5ec374746852e777a8a11b10c";
+const crudUrl = "https://crudcrud.com/api/e52365befa1147c7be4820bc3ff859ca";
 
 // Function to sanitize and retrieve email from local storage
 const getSanitizedEmail = () => {
@@ -15,27 +17,51 @@ const getSanitizedEmail = () => {
   let updatedEmail;
   if (email) {
     updatedEmail = email.replace(/[^a-zA-Z0-9]/g, "");
+    return updatedEmail;
   }
   console.log(updatedEmail);
-  return updatedEmail;
+  return null;
+  
 };
 
 // Function to add/update cart data in CRUD API
 const addToCrudHandler = async (updatedEmail, cartData) => {
-  try {
-    await fetch(`${crudUrl}/${updatedEmail}`, {
-      method: "POST",
-      body: JSON.stringify(cartData),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  } catch (error) {
-    console.log(error);
+  const authToken = localStorage.getItem("authToken");
+  // console.log("authToken:", authToken);
+  console.log("updatedEmail:", updatedEmail);
+  if (authToken) {
+    try {
+      await fetch(`${crudUrl}/cart${updatedEmail}`, {
+        method: "POST",
+        body: JSON.stringify(cartData),
+        headers: {
+          "Content-Type": "application/json",
+          //Authorization: `Bearer ${authToken}`,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 };
 
 const cartReducer = (state, action) => {
+  if(action.type === 'INITIALCART'){
+
+    let totalAmount = 0;
+    
+    // console.log(action.data);
+    totalAmount = action.items.reduce((acc, item) => acc+item.price*item.quantity,0);
+
+    console.log('totalamount',totalAmount);
+    return {
+        items: action.items,
+        totalAmount : totalAmount,
+
+    }
+ 
+}
+
   if (action.type === "ADD") {
     // Check if the item already exists in the cart
     const existingCartItemIndex = state.items.findIndex(
@@ -47,12 +73,7 @@ const cartReducer = (state, action) => {
        updatedItems = [...state.items];
       const existingCartItem = updatedItems[existingCartItemIndex];
       existingCartItem.quantity += action.item.quantity;
-    } else if (action.type === "SET_CART") {
-      return {
-        items: action.cartData.items || [],
-        totalAmount: action.cartData.totalAmount || 0,
-      };
-    }
+    } 
      else {
       updatedItems = state.items.concat(action.item);
     } 
@@ -70,123 +91,115 @@ const cartReducer = (state, action) => {
     addToCrudHandler(getSanitizedEmail(), newCart);
 
     return newCart;
+  } 
+
+  if(action.type=== "REMOVE"){
+    let existingCartItemIndex = state.items.findIndex((item)=>item.id === action.id)
+    const existingItems = state.items[existingCartItemIndex];
+    let TotalAmount = existingItems.price * existingItems.quantity;
+    let updatedTotalAmount = state.totalAmount - TotalAmount;
+    console.log(updatedTotalAmount)
+    let updatedItems = state.items.filter((item) => item.id !== action.id);
+    return {
+      ...state.items,
+      items: updatedItems,
+      totalAmount: updatedTotalAmount,
+    }
+  }
+
+    if (action.type=== "CLEAR_CART"){
+    return defaultCartState;
   }
   return state;
 };
 
 export const CartProvider = (props) => {
-  const storedCart = JSON.parse(localStorage.getItem("cart"));
-const [cartState, dispatchCartAction] = useReducer(
-  cartReducer,
-  storedCart || defaultCartState
-);
+  const Authctx = useContext(AuthenticationContext)
+  const [cartState, dispatchCartAction] = useReducer(
+    cartReducer,
+     defaultCartState
+  );
+
+  const removeFromCartApi = async(email ,id) =>{
+    // try {
+    //   console.log("dddddd")
+    //   const response = await fetch(`${crudUrl}/cart/${email}/${id}`, {
+    //     method: "DELETE",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
+      
+    //   if (response.ok) {
+    //     dispatchCartAction({ type: "REMOVE", id: id });
+    //   } else {
+    //     console.error("Error removing item from cart in the API");
+    //   }
+    // } catch (error) {
+    //   console.error("Error removing item from cart:", error);
+    // }
+  }
+
+  const fetchData = async () => {
+    console.log("fetch working");
+    try {
+      const email = getSanitizedEmail();
+      if (email) {
+        const response = await fetch(`${crudUrl}/cart${email}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
+        console.log(data);
+        if (data && data.length > 0) {
+          // Assuming data[data.length - 1].items is the array you want to use
+          const items = data[data.length - 1].items;
+
+          // Dispatch an action to update the cart state
+          dispatchCartAction({ type: "INITIALCART", items: items });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching cart data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [Authctx.isLoggedIn ]);
 
   const addItemToCartHandler = (item) => {
     dispatchCartAction({ type: "ADD", item: item });
   };
-// Function to get cart data from CRUD API
-const getCartDataHandler = async (email) => {
-  try {
-    const response = await fetch(`${crudUrl}/${email}`);
-    if (response.ok) {
-      const data = await response.json();
-      return data;
-    }
-  } catch (error) {
-    console.log(error);
-  }
-  return null;
-};
 
-useEffect(() => {
-  const email = getSanitizedEmail();
-  const fetchData = async () => {
-    try {
-      const cartData = await getCartDataHandler(email);
-      if (cartData) {
-        dispatchCartAction({ type: "SET_CART", cartData: cartData });
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  const clearCartHandler = () => {
+    dispatchCartAction({ type: "CLEAR_CART" });
+    // fetchData();
   };
-
-  // Fetch cart data when the user opens the cart
-  fetchData();
-}, []);
-
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cartState));
-  }, [cartState]);
+ const removeItemToCartHandler = (id) => {
+  dispatchCartAction({ type: "REMOVE" , id: id})
+  const email = getSanitizedEmail();
+  //removeFromCartApi(email ,id);
+  // console.log(id)
+ }
+  
 
   const cartContext = {
     items: cartState.items,
     totalAmount: cartState.totalAmount,
     addItem: addItemToCartHandler,
     quantity: cartState.items.length,
-    // removeItem: removeItemToCartHandler,
+    clearCart: clearCartHandler,
+    //fetchdata: fetchDataHandler,
+    removeItem: removeItemToCartHandler,
   };
 
   return (
     <ContextApi.Provider value={cartContext}>
       {props.children}
     </ContextApi.Provider>
-  );
-};
-
-export const AuthenticationContext = React.createContext({
-  token: "",
-  isLoggedIn: false,
-  login: (token, expiresIn) => {},
-  logout: () => {},
-  refreshToken: "",
-  expiresIn: "",
-});
-
-export const AuthenticationProvider = (props) => {
-  const storedToken = localStorage.getItem("authToken");
-  const [token, setToken] = useState(storedToken);
-  const userLoggedIn = !!token;
-
-  // Update localStorage when token changes
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem("authToken", token);
-    } else {
-      localStorage.removeItem("authToken");
-    }
-  }, [token]);
-
-  const login = (newToken, expiresIn = 300) => {
-    setToken(newToken);
-    const expirationTime = expiresIn * 1000; // Convert expiresIn to milliseconds
-    setTimeout(logout, expirationTime); // Set timeout for auto logout
-
-    localStorage.setItem("authToken", newToken);
-    localStorage.setItem("expirationTime", expirationTime.toString());
-  };
-
-  const logout = () => {
-    setToken(null);
-    localStorage.removeItem("email");
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("expirationTime");
-   
-  };
-
-  const contextValue = {
-    token: token,
-    isLoggedIn: userLoggedIn,
-    login: login,
-    logout: logout,
-    refreshToken: "",
-    expiresIn: "",
-  };
-
-  return (
-    <AuthenticationContext.Provider value={contextValue}>
-      {props.children}
-    </AuthenticationContext.Provider>
   );
 };
 
